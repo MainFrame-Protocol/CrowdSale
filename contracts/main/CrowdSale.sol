@@ -28,7 +28,7 @@ contract CrowdSale is Ownable {
     uint256 public availableTokens;
     uint256 public tokenTotalSupply;
     uint256 public minPurchase;
-    //uint256 public maxPurchase;
+    uint256 public maxPurchase;
     bool public saleEnded;
     bool public isStopSale;
 
@@ -44,7 +44,7 @@ contract CrowdSale is Ownable {
         uint256 amount
     );
     event Imburse(address payable indexed imbursePurchaser, uint256 amount);
-    event CrowdSaleStarted(uint256 total, uint256 sale, uint256 minp);
+    event CrowdSaleStarted(uint256 total, uint256 sale, uint256 minp, uint256 maxp);
 
     constructor(
         address _VMAINAddress,
@@ -60,12 +60,14 @@ contract CrowdSale is Ownable {
      * @param _duration - Duration of the sale
      * @param _rate - Number of token units a buyer gets per wei
      * @param _minPurchase - Minimum deposit required
+     * @param _maxPurchase - Maximum purchase
      * @param _crowdSaleSupply - Max number of tokens for the sale
      */
     function start(
         uint256 _duration,
         uint256 _rate,
         uint256 _minPurchase,
+        uint256 _maxPurchase,
         uint256 _crowdSaleSupply
     ) external onlyOwner saleNotActive {
         VMAINToken tokenInstance = VMAINToken(token);
@@ -80,6 +82,10 @@ contract CrowdSale is Ownable {
             "_minPurchase should be < crowdSaleSupply"
         );
         require(
+            _maxPurchase < crowdSaleSupply,
+            "_maxPurchase should be < crowdSaleSupply"
+        );
+        require(
             crowdSaleSupply <= tokenTotalSupply,
             "crowdSaleSupply should be <= totalSupply"
         );
@@ -88,7 +94,8 @@ contract CrowdSale is Ownable {
         end = _duration.add(block.timestamp);
         rate = _rate;
         minPurchase = _minPurchase;
-        emit CrowdSaleStarted(tokenTotalSupply, crowdSaleSupply, minPurchase);
+        maxPurchase = _maxPurchase;
+        emit CrowdSaleStarted(tokenTotalSupply, crowdSaleSupply, minPurchase, maxPurchase);
     }
 
     /**
@@ -106,6 +113,12 @@ contract CrowdSale is Ownable {
             msg.value >= minPurchase,
             "must send more then global minPurchase"
         );
+
+        require(
+            msg.value <= maxPurchase,
+            "must send more then global maxPurchase"
+        );
+
         uint256 tokenQuantityAllowed = getTokenAmount(msg.value);
         if (tokenQuantityAllowed > availableTokens) {
             tokenQuantityAllowed = availableTokens;
