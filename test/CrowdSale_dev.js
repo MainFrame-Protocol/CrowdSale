@@ -14,6 +14,7 @@ contract('CrowdSale', (accounts) => {
 
   const totalSupply = web3.utils.toWei('300');
   const minpurchase = web3.utils.toWei('0.1');
+  const maxPurchase = web3.utils.toWei('1.5');
   
   const duration = 20;
   const rate = 2; 
@@ -61,7 +62,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       const rate = 2;
       let crowdsalesupply = web3.utils.toWei('200');
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: owner}), 
+        crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}), 
         'Need to call setSaleAdmin on VMAINToken before start'
       );
     });  
@@ -92,7 +93,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       
       crowdsalesupply = web3.utils.toWei('301');
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: owner}), 
+        crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}), 
         'crowdSaleSupply should be <= totalSupply'
       );
     });
@@ -124,7 +125,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress, { from: vMainAdmin });
       await crowdsale.start(duration, rate, minpurchase, crowdsalesupply, { from: owner });
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: owner}),
+        crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}),
         'Sale should not be active'
       );
     });
@@ -137,7 +138,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       crowdsalesupply = web3.utils.toWei('5');
   const start = parseInt((new Date()).getTime() / 1000);
 //  time.increaseTo(start +5);
-      await crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: owner}); 
+      await crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}); 
   const expectedEnd = start + duration ;
   const end = await crowdsale.end();
       
@@ -175,7 +176,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress,{ from: vMainAdmin }); 
       await crowdsale.addAdmins(adminWallet, { from: owner });
 
-      await crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: owner});
+      await crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner});
     });
     describe("BUY", () => {
     
