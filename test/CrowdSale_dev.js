@@ -101,7 +101,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress,{ from: vMainAdmin });
       crowdsalesupply = web3.utils.toWei('50');
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchase, crowdsalesupply, {from: accounts[2]}),
+        crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: accounts[2]}),
         'Ownable: caller is not the owner'
       );
     });
@@ -109,7 +109,7 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress,{ from: vMainAdmin });
       let minpurchaseNA = 0;
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchaseNA, crowdsalesupply, {from: owner}),
+        crowdsale.start(duration, rate, minpurchaseNA, maxPurchase, crowdsalesupply, {from: owner}),
         '_minPurchase should be > 0'
       );
     });
@@ -117,13 +117,13 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress,{ from: vMainAdmin });
       minpurchaseNA = web3.utils.toWei('51');
       await expectRevert(
-        crowdsale.start(duration, rate, minpurchaseNA, crowdsalesupply, {from: owner}),
+        crowdsale.start(duration, rate, minpurchaseNA, maxPurchase, crowdsalesupply, {from: owner}),
         '_minPurchase should be < crowdSaleSupply'
       );
     });
     it('should Fail start after successful start', async () => {
       await token.setSaleAdmin(saleAddress, { from: vMainAdmin });
-      await crowdsale.start(duration, rate, minpurchase, crowdsalesupply, { from: owner });
+      await crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner });
       await expectRevert(
         crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}),
         'Sale should not be active'
@@ -136,11 +136,11 @@ console.log(tokenAddr +  "  " + mainFrameAddress);
       await token.setSaleAdmin(saleAddress,{ from: vMainAdmin });
       await crowdsale.addAdmins(adminWallet, { from: owner });
       crowdsalesupply = web3.utils.toWei('5');
-  const start = parseInt((new Date()).getTime() / 1000);
-//  time.increaseTo(start +5);
+      const start = parseInt((new Date()).getTime() / 1000);
+      //  time.increaseTo(start +5);
       await crowdsale.start(duration, rate, minpurchase, maxPurchase, crowdsalesupply, {from: owner}); 
-  const expectedEnd = start + duration ;
-  const end = await crowdsale.end();
+      const expectedEnd = start + duration ;
+      const end = await crowdsale.end();
       
       console.log("expectedEnd:  " + expectedEnd);
       console.log("end:  " + end);
